@@ -20,7 +20,7 @@ runs:
     GITHUB_PAGES_BRANCH: ${{ inputs.githubPagesBranch }}
     GIT_SUBTREE_PREFIX: ${{ inputs.gitSubtreePrefix }}
     DEBUG: ${{ inputs.debugAction }}
-    ARCHI_REPORT_PATH: ${{ inputs.buildFolder }}
+    BUILDFOLDER: ${{ inputs.buildFolder }}
 
 inputs:
   buildFolder:

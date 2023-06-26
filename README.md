@@ -1,5 +1,10 @@
 # Archimate container image for CI <!-- omit in toc -->
 
+Minimal fork of [WoozyMasta](https://github.com/WoozyMasta/archimate-ci-image), 
+trying to make this work with Azura SWA
+
+
+
 [Archi][Archi repository] container image for use in continuous integration
 pipelines. With this container, you can implement automatic report generation
 and model export in your pipeline.

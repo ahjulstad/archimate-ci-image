@@ -208,108 +208,108 @@ if [ "${GITHUB_ACTIONS:-}" == true ]; then
   # Create report
   archi_run
 
-  [ "${ARCHI_HTML_REPORT_ENABLED,,}" == true ] && update_html
+  # [ "${ARCHI_HTML_REPORT_ENABLED,,}" == true ] && update_html
 
-  # Commit and push subtree
-  git add --force "$GIT_SUBTREE_PREFIX"
-  git commit --message "Archimate report ${GITHUB_ACTION:-0}:${GITHUB_JOB:-0}"
+  # # Commit and push subtree
+  # git add --force "$GIT_SUBTREE_PREFIX"
+  # git commit --message "Archimate report ${GITHUB_ACTION:-0}:${GITHUB_JOB:-0}"
 
-  _subtree="$(
-    git subtree split --prefix "$GIT_SUBTREE_PREFIX" "$GITHUB_REF_NAME"
-  )"
-  git push origin "$_subtree:$GITHUB_PAGES_BRANCH" --force
+  # _subtree="$(
+  #   git subtree split --prefix "$GIT_SUBTREE_PREFIX" "$GITHUB_REF_NAME"
+  # )"
+  # git push origin "$_subtree:$GITHUB_PAGES_BRANCH" --force
 
   exit 0
 
 fi
 
-# Run in GitLab CI
-if [ "${GITLAB_CI:-}" == true ]; then
-  echo "Run Archi report generation in GitLab CI"
-  section_start 'archi_report' 'Render ArchiMate report'
+# # Run in GitLab CI
+# if [ "${GITLAB_CI:-}" == true ]; then
+#   echo "Run Archi report generation in GitLab CI"
+#   section_start 'archi_report' 'Render ArchiMate report'
 
-  # Set actions specified paths
-  ARCHI_REPORT_PATH="$CI_PROJECT_DIR/public"
-  ARCHI_HTML_REPORT_PATH="$CI_PROJECT_DIR/public"
-  ARCHI_CSV_REPORT_PATH="$CI_PROJECT_DIR/public"
-  ARCHI_JASPER_REPORT_PATH="$CI_PROJECT_DIR/public"
-  ARCHI_EXPORT_MODEL_PATH="$CI_PROJECT_DIR/public"
-  cd "$ARCHI_PROJECT_PATH" && mkdir -p "$ARCHI_REPORT_PATH"
+#   # Set actions specified paths
+#   ARCHI_REPORT_PATH="$CI_PROJECT_DIR/public"
+#   ARCHI_HTML_REPORT_PATH="$CI_PROJECT_DIR/public"
+#   ARCHI_CSV_REPORT_PATH="$CI_PROJECT_DIR/public"
+#   ARCHI_JASPER_REPORT_PATH="$CI_PROJECT_DIR/public"
+#   ARCHI_EXPORT_MODEL_PATH="$CI_PROJECT_DIR/public"
+#   cd "$ARCHI_PROJECT_PATH" && mkdir -p "$ARCHI_REPORT_PATH"
 
-  # Create report
-  archi_run
-  [ "${ARCHI_HTML_REPORT_ENABLED,,}" == true ] && update_html
+#   # Create report
+#   archi_run
+#   [ "${ARCHI_HTML_REPORT_ENABLED,,}" == true ] && update_html
 
-  section_end 'Render ArchiMate report complete'
-  exit 0
-fi
+#   section_end 'Render ArchiMate report complete'
+#   exit 0
+# fi
 
-# Check and use exist or mounted model
-if [ -f "$ARCHI_PROJECT_PATH/model/folder.xml" ]; then
-  echo "Work with exist model in $ARCHI_PROJECT_PATH directory"
-  # Try update exist model
-  {
-    git -C "$ARCHI_PROJECT_PATH" pull &>/dev/null &&
-    echo "Use actual state of model $_project."
-  } || :
+# # Check and use exist or mounted model
+# if [ -f "$ARCHI_PROJECT_PATH/model/folder.xml" ]; then
+#   echo "Work with exist model in $ARCHI_PROJECT_PATH directory"
+#   # Try update exist model
+#   {
+#     git -C "$ARCHI_PROJECT_PATH" pull &>/dev/null &&
+#     echo "Use actual state of model $_project."
+#   } || :
 
 
-# Work with remote git repository model
-elif [ -n "${GIT_REPOSITORY:-}" ]; then
+# # Work with remote git repository model
+# elif [ -n "${GIT_REPOSITORY:-}" ]; then
 
-  # Chek URL is SSH and clone
-  if re_match "${GIT_REPOSITORY:-}" "^$_re_proto_ssh$_re_url$"; then
-    echo "Clone model from $GIT_REPOSITORY to $ARCHI_PROJECT_PATH dir with ssh"
-    git_clone "$GIT_REPOSITORY"
+#   # Chek URL is SSH and clone
+#   if re_match "${GIT_REPOSITORY:-}" "^$_re_proto_ssh$_re_url$"; then
+#     echo "Clone model from $GIT_REPOSITORY to $ARCHI_PROJECT_PATH dir with ssh"
+#     git_clone "$GIT_REPOSITORY"
 
-  # Check URL is HTTP
-  elif re_match "${GIT_REPOSITORY:-}" "^$_re_proto_http$_re_url$"; then
-    _proto="${GIT_REPOSITORY%://*}"
+#   # Check URL is HTTP
+#   elif re_match "${GIT_REPOSITORY:-}" "^$_re_proto_http$_re_url$"; then
+#     _proto="${GIT_REPOSITORY%://*}"
 
-    # Use token if set
-    if [ -n "${GIT_TOKEN:-}" ]; then
-      # Encode symbols
-      GIT_TOKEN="$(urlencode "$GIT_TOKEN")"
+#     # Use token if set
+#     if [ -n "${GIT_TOKEN:-}" ]; then
+#       # Encode symbols
+#       GIT_TOKEN="$(urlencode "$GIT_TOKEN")"
 
-      if re_match "${GIT_REPOSITORY:-}" '^https://github.com/'; then
-        _auth="x-access-token:$GIT_TOKEN"
-      else
-        _auth="oauth2:$GIT_TOKEN"
-      fi
+#       if re_match "${GIT_REPOSITORY:-}" '^https://github.com/'; then
+#         _auth="x-access-token:$GIT_TOKEN"
+#       else
+#         _auth="oauth2:$GIT_TOKEN"
+#       fi
 
-      echo \
-        "Clone model from $GIT_REPOSITORY to $ARCHI_PROJECT_PATH dir use token"
-      git_clone "$_proto://$_auth@${GIT_REPOSITORY#*://}"
+#       echo \
+#         "Clone model from $GIT_REPOSITORY to $ARCHI_PROJECT_PATH dir use token"
+#       git_clone "$_proto://$_auth@${GIT_REPOSITORY#*://}"
 
-    # Use login and password
-    elif [ -n "${GIT_USERNAME:-}" ] && [ -n "${GIT_PASSWORD:-}" ]; then
-      # Encode symbols
-      _auth="$(urlencode "$GIT_USERNAME"):$(urlencode "$GIT_PASSWORD")"
+#     # Use login and password
+#     elif [ -n "${GIT_USERNAME:-}" ] && [ -n "${GIT_PASSWORD:-}" ]; then
+#       # Encode symbols
+#       _auth="$(urlencode "$GIT_USERNAME"):$(urlencode "$GIT_PASSWORD")"
 
-      echo \
-        "Clone model from $GIT_REPOSITORY to $ARCHI_PROJECT_PATH dir use token"
-      git_clone "$_proto://$_auth@${GIT_REPOSITORY#*://}"
+#       echo \
+#         "Clone model from $GIT_REPOSITORY to $ARCHI_PROJECT_PATH dir use token"
+#       git_clone "$_proto://$_auth@${GIT_REPOSITORY#*://}"
 
-    # Use public repository access
-    else
-      echo \
-        "Clone model from repository $GIT_REPOSITORY to $ARCHI_PROJECT_PATH dir"
-      git_clone "$GIT_REPOSITORY"
+#     # Use public repository access
+#     else
+#       echo \
+#         "Clone model from repository $GIT_REPOSITORY to $ARCHI_PROJECT_PATH dir"
+#       git_clone "$GIT_REPOSITORY"
 
-    fi
+#     fi
 
-  # Git URL not valid
-  else
-    fail 'Git repository URL not valid. Plese use http or ssh url'
-  fi
+#   # Git URL not valid
+#   else
+#     fail 'Git repository URL not valid. Plese use http or ssh url'
+#   fi
 
-# Exit. Model not exist
-else
-  fail \
-    "Plese set http or ssh url to git repositorty in \$GIT_REPOSITORY" \
-    "variable or mount model to \$ARCHI_PROJECT_PATH ($ARCHI_PROJECT_PATH)" \
-    'directory.'
-fi
+# # Exit. Model not exist
+# else
+#   fail \
+#     "Plese set http or ssh url to git repositorty in \$GIT_REPOSITORY" \
+#     "variable or mount model to \$ARCHI_PROJECT_PATH ($ARCHI_PROJECT_PATH)" \
+#     'directory.'
+# fi
 
 
 # Make report

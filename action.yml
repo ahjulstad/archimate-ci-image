@@ -20,8 +20,12 @@ runs:
     GITHUB_PAGES_BRANCH: ${{ inputs.githubPagesBranch }}
     GIT_SUBTREE_PREFIX: ${{ inputs.gitSubtreePrefix }}
     DEBUG: ${{ inputs.debugAction }}
+    ARCHI_REPORT_PATH: ${{ inputs.buildFolder }}
 
 inputs:
+  buildFolder:
+    description: Folder for generated reports
+    required: true
   githubToken:
     description: GitHub token for accessing the git repository
     required: true

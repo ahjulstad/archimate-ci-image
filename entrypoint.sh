@@ -8,7 +8,7 @@ set -euo pipefail
 
 # Script environments
 : "${ARCHI_PROJECT_PATH:=${GITHUB_WORKSPACE:-${CI_PROJECT_DIR:-/archi/project}}}"
-: "${ARCHI_REPORT_PATH:=/archi/report}"
+# : "${ARCHI_REPORT_PATH:=/docs/build/archi}"
 : "${ARCHI_HTML_REPORT_ENABLED:=true}"
 : "${ARCHI_JASPER_REPORT_ENABLED:=false}"
 : "${ARCHI_JASPER_REPORT_FORMATS:=PDF,DOCX}"
